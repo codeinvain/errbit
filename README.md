@@ -80,13 +80,29 @@ Configuration
 Errbit configuration is done entirely through environment variables. See
 [configuration](docs/configuration.md)
 
-Deploy Hooks
--------------
-Errbit can track your application deploys. See [deploy hooks](docs/deploy-hooks.md)
-
 Deployment
 ----------
 See [notes on deployment](docs/deployment.md)
+
+Notice Grouping
+---------------
+The way Errbit arranges notices into error groups is configurable. By default,
+Errbit uses the notice's error class, error message, complete backtrace,
+component (or controller), action and environment name to generate a unique
+fingerprint for every notice. Notices with identical fingerprints appear in the
+UI as different occurences of the same error and notices with differing
+fingerprints are displayed as separate errors.
+
+Changing the fingerprinter (under the 'config' menu) applies to all apps and
+the change affects only notices that arrive after the change. If you want to
+refingerprint old notices, you can run `rake errbit:notice_refingerprint`.
+
+Managing apps
+---------------------
+An Errbit app is a place to collect error notifications from your external
+application deployments.
+
+See [apps](docs/apps.md)
 
 Authentication
 --------------
@@ -106,7 +122,7 @@ If you host Errbit at errbit.example.com, you would fill in:
 * After you have registered your app, set GITHUB_CLIENT_ID and GITHUB_SECRET
   with your app's Client ID and Secret key.
 
-When you start your applicatoin, you should see the option to **Sign in with
+When you start your application, you should see the option to **Sign in with
 GitHub** on the Login page. You will also be able to link your GitHub profile
 to your user account on your **Edit profile** page.
 
@@ -177,8 +193,8 @@ When upgrading Errbit, please run:
 git pull origin master # assuming origin is the github.com/errbit/errbit repo
 bundle install
 rake db:migrate
-rake db:mongoid:create_indexes
 rake db:mongoid:remove_undefined_indexes
+rake db:mongoid:create_indexes
 rake assets:precompile
 ```
 
@@ -189,6 +205,16 @@ This will ensure that your application stays up to date with any schema changes.
 * You must have already run migrations at least up to v0.3.0. Check to
   make sure you're schema version is at least 20131011155638 by running rake
   db:version before you upgrade beyond v0.4.0
+* Notice fingerprinting has changed and is now easy to configure. But this
+  means you'll have to regenerate fingerprints on old notices in order to for
+  them to be properly grouped with new notices. To do this run: `rake
+  errbit:notice_refingerprint`. If you were using a custom fingerprinter class
+  in a previous version, be aware that it will no longer have any effect.
+  Fingerprinting is now configurable within the Errbit UI.
+* Prior to v0.4.0, users were only able to see apps they were watching.  All
+  users can now see all apps and they can watch or unwatch any app. If you were
+  using the watch feature to hide secret apps, you should not upgrade beyond
+  v0.4.0.
 
 ### Upgrading errbit from v0.3.0 to v0.4.0
 
@@ -217,32 +243,20 @@ This tab will be hidden if no user information is available.
 
 Javascript error notifications
 --------------------------------------
-
 You can log javascript errors that occur in your application by including the
 [airbrake-js](https://github.com/airbrake/airbrake-js) javascript library.
 
-Install airbrake-js according to the docs at
-[airbrake-js](https://github.com/airbrake/airbrake-js) and set your project and
-host as early as possible:
+Install airbrake-js according to the docs at and set your project and host as
+soon as you want to start reporting errors. Then follow along with the
+documentation at https://github.com/airbrake/airbrake-js/blob/master/README.md
 
 ```javascript
-Airbrake.setProject("ERRBIT API KEY", "ERRBIT API KEY");
-Airbrake.setHost("http://errbit.yourdomain.com");
-```
-
-Using custom fingerprinting methods
------------------------------------
-
-Errbit collates errors into groups using a fingerprinting strategy. If you find
-your errors are not getting grouped the way you would expect, you may need to
-implement your own strategy. A fingerprinting strategy is just a class that
-implements a ::generate class method. See the classes in
-`app/models/fingerprint/` if you need some inspiration. You can install it with
-an initializer like:
-
-```ruby
-# config/initializers/fingerprint.rb
-ErrorReport.fingerprint_strategy = MyStrategy
+var airbrake = new airbrakeJs.Client({
+  projectId: 'ERRBIT API KEY',
+  projectKey: 'ERRBIT API KEY (again)',
+  reporter: 'xhr',
+  host: 'https://myerrbit.com'
+});
 ```
 
 Plugins and Integrations

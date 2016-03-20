@@ -3,7 +3,7 @@ class CommentsController < ApplicationController
   before_action :find_problem
 
   def create
-    @comment = Comment.new(comment_params.merge(:user_id => current_user.id))
+    @comment = Comment.new(comment_params.merge(user_id: current_user.id))
     if @comment.valid?
       @problem.comments << @comment
       @problem.save
@@ -24,16 +24,17 @@ class CommentsController < ApplicationController
     redirect_to app_problem_path(@app, @problem)
   end
 
-  protected
-    def find_app
-      @app = App.find(params[:app_id])
-    end
+protected
 
-    def find_problem
-      @problem = @app.problems.find(params[:problem_id])
-    end
+  def find_app
+    @app = App.find(params[:app_id])
+  end
 
-    def comment_params
-      params.require(:comment).permit!
-    end
+  def find_problem
+    @problem = @app.problems.find(params[:problem_id])
+  end
+
+  def comment_params
+    params.require(:comment).permit!
+  end
 end
