@@ -26,7 +26,7 @@ Errbit::Config = Configurator.run(
 
   serve_static_assets:       ['SERVE_STATIC_ASSETS'],
   secret_key_base:           ['SECRET_KEY_BASE'],
-  mongo_url:                 %w(MONGOLAB_URI MONGOHQ_URL MONGODB_URL MONGO_URL),
+  mongo_url:                 %w(MONGODB_URI MONGOLAB_URI MONGOHQ_URL MONGODB_URL MONGO_URL),
 
   # github
   github_url:                ['GITHUB_URL', lambda do |values|
@@ -39,6 +39,11 @@ Errbit::Config = Configurator.run(
   github_access_scope:       ['GITHUB_ACCESS_SCOPE'],
   github_api_url:            ['GITHUB_API_URL'],
   github_site_title:         ['GITHUB_SITE_TITLE'],
+  # google
+  google_authentication:     ['GOOGLE_AUTHENTICATION'],
+  google_site_title:         ['GOOGLE_SITE_TITLE'],
+  google_client_id:          ['GOOGLE_CLIENT_ID'],
+  google_secret:             ['GOOGLE_SECRET'],
 
   email_delivery_method:     ['EMAIL_DELIVERY_METHOD', lambda do |values|
     values[:email_delivery_method] && values[:email_delivery_method].to_sym
